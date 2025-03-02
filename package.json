@@ -1,6 +1,6 @@
 {
-  "name": "object-detector-resnet101",
-  "homepage": "https://nikhil-kadapla/object-detector-resnet101.github.io/",
+  "name": "object-detection-using-the-resnet-101-model",
+  "homepage": "https://nikhil-kadapala.github.io/object-detector-resnet101/",
   "private": true,
   "version": "0.0.0",
   "type": "module",

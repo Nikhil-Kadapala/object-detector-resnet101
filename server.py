@@ -33,7 +33,7 @@ if os.environ.get('FLASK_ENV') == 'development':
     CORS(app)
     app.config['TALISMAN_ENABLED'] = False
 else:
-    CORS(app, origins=["https://nikhil-kadapala.github.io/object-detector-resnet101/"], supports_credentials=False)
+    CORS(app, resources={r"/*": {"origins": "https://nikhil-kadapala.github.io"}}, supports_credentials=False)
 
     talisman = Talisman(
         app,

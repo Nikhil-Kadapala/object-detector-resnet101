@@ -50,10 +50,12 @@ const ImageContainer = () => {
         try {
             const formData = new FormData();
             formData.append('image', file);
-            const response = await fetch('https://object-detector-resnet101.onrender.com/', 
+            const response = await fetch('https://object-detector-resnet101.onrender.com', 
             {
                 method: 'POST',
-                body: formData
+                body: formData,
+                mode: 'cors',
+                credentials: 'include'
             });
             const data = await response.json();
             console.log('Server response:', data);

@@ -44,9 +44,6 @@ else:
         }
     )
 
-from werkzeug.middleware.proxy_fix import ProxyFix
-app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
-
 @app.before_request
 def enforce_https():
     if os.environ.get('FLASK_ENV') == 'development':
@@ -166,6 +163,7 @@ def set_security_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers["Access-Control-Allow-Origin"] = "https://nikhil-kadapala.github.io"
     return response
 
 if __name__ == '__main__':

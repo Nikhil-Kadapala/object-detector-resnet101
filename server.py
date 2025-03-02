@@ -100,10 +100,10 @@ def predict_class(image_path):
         raise
 
 
-@app.route('/', methods=['GET'])
+#@app.route('/', methods=['GET'])
 
-def main():
-    return send_from_directory(app.static_folder, "index.html")
+#def main():
+    #return send_from_directory(app.static_folder, "index.html")
 
 limiter = Limiter(
     app=app,
@@ -113,7 +113,7 @@ limiter = Limiter(
 
 @limiter.limit("5 per minute")
 
-@app.route('/detect', methods=['POST'])
+@app.route('/', methods=['GET', 'POST'])
 
 def upload_file():
     if request.method == 'POST':

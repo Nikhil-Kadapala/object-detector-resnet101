@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify, send_from_directory, redirect
+from flask import Flask, request, jsonify, send_from_directory, redirect, make_response
 from flask_talisman  import Talisman
 from flask_cors import CORS, cross_origin
 import torch
@@ -110,10 +110,26 @@ limiter = Limiter(
     strategy="fixed-window"
 )
 
-@limiter.limit("5 per minute")
+@app.route('/', methods=['OPTIONS'])
+@cross_origin(origins="https://nikhil-kadapala.github.io")
+def handle_options():
+    response = make_response()
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    return response
+
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    response.headers["Access-Control-Allow-Origin"] = "https://nikhil-kadapala.github.io"
+    return response
 
 @app.route('/', methods=['GET', 'POST'])
 @cross_origin(origins="https://nikhil-kadapala.github.io")
+@limiter.limit("5 per minute")
 def upload_file():
     if request.method == 'POST':
         try:
@@ -156,15 +172,6 @@ def upload_file():
             return jsonify({'error': 'Server error processing image'}), 500
     else:
         return jsonify({'message': 'Ready to process images. Please send a POST request with an image.'})
-
-@app.after_request
-def set_security_headers(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers["Access-Control-Allow-Origin"] = "https://nikhil-kadapala.github.io"
-    return response
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

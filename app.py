@@ -33,7 +33,7 @@ if os.environ.get('FLASK_ENV') == 'development':
     CORS(app)
     app.config['TALISMAN_ENABLED'] = False
 else:
-    CORS(app, resources={r"/*": {"origins": "https://nikhil-kadapala.github.io"}}, supports_credentials=False)
+    CORS(app, resources={r"/*": {"origins": "https://nikhil-kadapala.github.io/"}})
 
     talisman = Talisman(
         app,
@@ -116,7 +116,7 @@ limiter = Limiter(
 @limiter.limit("5 per minute")
 
 @app.route('/', methods=['GET', 'POST'])
-@cross_origin(origins="https://nikhil-kadapala.github.io", allow_headers=["Access-Control-Allow-Origin"])
+@cross_origin(origins="https://nikhil-kadapala.github.io/")
 def upload_file():
     if request.method == 'POST':
         try:

@@ -1,5 +1,6 @@
 # React + Vite
 
+<<<<<<< HEAD
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
 Currently, two official plugins are available:
@@ -26,3 +27,8 @@ Full portfolio coming soon.
 </head>
 </html>
 >>>>>>> 3f4bb9d1bf5e63b21c1df2962cb3e12324ccc721
+=======
+The backend is a simple Python flask app that receives an image input from the front-end application.
+
+The front-end UI is a simple React+Vite Framework front-end application.
+>>>>>>> 8f725309f5577e3c466fb2581ee6919782ccd4c2

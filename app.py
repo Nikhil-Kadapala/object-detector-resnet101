@@ -1,7 +1,7 @@
 import os
 from flask import Flask, request, jsonify, send_from_directory, redirect
 from flask_talisman  import Talisman
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 import torch
 from PIL import Image
 from torchvision import transforms, models
@@ -114,7 +114,7 @@ limiter = Limiter(
 @limiter.limit("5 per minute")
 
 @app.route('/', methods=['GET', 'POST'])
-
+@cross_origin(origins="https://nikhil-kadapala.github.io")
 def upload_file():
     if request.method == 'POST':
         try:

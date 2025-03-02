@@ -116,6 +116,7 @@ def handle_options():
     response = make_response()
     response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Origin', 'https://nikhil-kadapala.github.io')
     return response
 
 @app.after_request
@@ -124,7 +125,6 @@ def set_security_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers["Access-Control-Allow-Origin"] = "https://nikhil-kadapala.github.io"
     return response
 
 @app.route('/', methods=['GET', 'POST'])

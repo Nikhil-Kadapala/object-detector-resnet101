@@ -108,13 +108,15 @@ def predict_class(image_path):
 limiter = Limiter(
     app=app,
     key_func=get_remote_address,
-    default_limits=["100 per day", "50 per hour"]
+    default_limits=["100 per day", "50 per hour"],
+    storage_uri="redis://red-cv29v6d6l47c73fmc1sg:6379",
+    strategy="fixed-window"
 )
 
 @limiter.limit("5 per minute")
 
 @app.route('/', methods=['GET', 'POST'])
-@cross_origin(origins="https://nikhil-kadapala.github.io")
+@cross_origin(origins="https://nikhil-kadapala.github.io", allow_headers=["Access-Control-Allow-Origin"])
 def upload_file():
     if request.method == 'POST':
         try:

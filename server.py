@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import torch
 from PIL import Image
@@ -17,12 +17,12 @@ UPLOAD_FOLDER = '/tmp'
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="./dist", static_url_path="/")
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Configure CORS for production
-CORS(app, origins=["https://nikhil-kadapla/object-detector-resnet101.github.io"])
+CORS(app, origins=["https://nikhil-kadapala.github.io/object-detector-resnet101/"])
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -68,6 +68,10 @@ def predict_class(image_path):
         raise
 
 @app.route('/', methods=['GET', 'POST'])
+
+def main():
+    return send_from_directory(app.static_folder, "index.html")
+
 def upload_file():
     if request.method == 'POST':
         try:
@@ -88,7 +92,7 @@ def upload_file():
             # Create a safe filename
             filename = secure_filename(file.filename)
             unique_filename = f"{uuid.uuid4()}_{filename}"
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], unique_filename)
+            file_path = os.path.normpath(os.path.join(app.config['UPLOAD_FOLDER'], unique_filename))
             
             # Save file
             file.save(file_path)

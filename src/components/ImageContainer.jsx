@@ -16,7 +16,7 @@ const ImageContainer = () => {
 
     useEffect(() => {
         const loadImages = async () => {
-            const imageModules = import.meta.glob('../images/*.{png,jpg,jpeg,svg,webp}');
+            const imageModules = import.meta.glob('../images/*.{png,jpg,jpeg,svg,webp,js}', { eager: false });
             const imageUrls = [];
             
             for (const path in imageModules) {
@@ -57,17 +57,15 @@ const ImageContainer = () => {
             });
             const data = await response.json();
             console.log('Server response:', data);
-            console.log(data.stopSlideshow);
-            console.log('Server response:', data);
             if (data.stopSlideshow) {
                 console.log('Server indicated to not start the slideshow');
                 setIsPlaying(true);
                 await sleep(5000);
             }
-            setServerResponse(data); // Note: Accessing the first element of the array
+            setServerResponse(data);
         } catch (error) {
-            console.error('Error starting slideshow:', error);
-            setServerResponse({ error: error.message });
+            console.error('Error contacting the server:', error);
+            setServerResponse({ category: "Backend server is inactive 😓 Please try again later 🙏"});
         } finally {
             setIsSearching(false);
         }
@@ -99,6 +97,7 @@ const ImageContainer = () => {
             fileInput.value = '';
         }
     };
+
    
     useEffect(() => {
         if (serverResponse && serverResponse.stopSlideshow) {
@@ -110,7 +109,7 @@ const ImageContainer = () => {
     }, [serverResponse, stopSlideshow]);
 
     if (images.length === 0) {
-        return <div>Loading images...</div>;
+        return <div>Loading the Database...</div>;
     }
 
     return (
@@ -122,7 +121,7 @@ const ImageContainer = () => {
                         <div className="upload-container mt-10 mb-10 px-40 items-center">
                             <input type="file" accept="image/*" />
                         </div>
-                        <div className="mx-60 mb-20 rounded-xl bg-gray-300 text-gray-700 hover:bg-gray-900 hover:text-gray-300">
+                        <div className="mx-60 mb-14 rounded-xl bg-gray-300 text-gray-700 hover:bg-gray-900 hover:text-gray-300">
                             {!isPlaying && (
                                 <button 
                                     onClick={uploadImage}
@@ -134,7 +133,7 @@ const ImageContainer = () => {
                     </div>
                     {isSearching ? (
                         
-                        <div className="mx-auto mb-20">
+                        <div className="mx-auto mb-10">
                             {isPlaying && (
                                 <img 
                                     src={images[currentImageIndex]} 
@@ -147,17 +146,17 @@ const ImageContainer = () => {
                         serverResponse && (
                             <div>
                                 {imageSrc && (
-                                    <div className="mx-auto mb-20">
+                                    <div className="mx-auto mb-14">
                                         <img 
                                             src={imageSrc} 
                                             alt="Selected" 
                                         />
                                     </div>
                                 )}
-                                <div className="relative flex mx-auto mb-20 justify-center">
+                                <div className="mx-auto mb-14 justify-center">
                                     <h3>Your Uploaded Image contains:</h3>
                                     <motion.h4
-                                        className="text-2xl font-semibold px-5 max-w-screen-3xl logo"
+                                        className="mt-10 text-2xl font-semibold logo"
                                         initial={{ opacity: 0, y: -20 }}
                                         whileInView={{ opacity: 1, y: 0 }}
                                         transition={{ duration: 1 }}
@@ -166,7 +165,7 @@ const ImageContainer = () => {
                                         {serverResponse["category"]}
                                     </motion.h4>
                                 </div>
-                                <div className="mx-60 mb-24 rounded-xl bg-gray-300 text-gray-950  hover:bg-gray-950 hover:text-gray-300">
+                                <div className="mx-60 mb-5 rounded-xl bg-gray-300 text-gray-950  hover:bg-gray-950 hover:text-gray-300">
                                     <button 
                                         onClick={resetView}
                                     >

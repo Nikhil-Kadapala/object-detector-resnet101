@@ -50,7 +50,7 @@ const ImageContainer = () => {
         try {
             const formData = new FormData();
             formData.append('image', file);
-            const response = await fetch('https://nikhil-kadapala.github.io/object-detector-resnet101/', 
+            const response = await fetch('https://object-detector-resnet-101-767c571fd4de.herokuapp.com/detect', 
             {
                 method: 'POST',
                 body: formData

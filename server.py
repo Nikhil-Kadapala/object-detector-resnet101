@@ -1,5 +1,6 @@
 import os
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, redirect
+from flask_talisman  import Talisman
 from flask_cors import CORS
 import torch
 from PIL import Image
@@ -8,12 +9,18 @@ from torchvision.models import resnet101, ResNet101_Weights
 import uuid
 import logging
 from werkzeug.utils import secure_filename
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-UPLOAD_FOLDER = '/tmp'
+UPLOAD_FOLDER = os.environ.get('TEMP_FOLDER', os.path.join(os.path.dirname(__file__), 'tmp'))
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+    
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
 
@@ -22,8 +29,33 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
 # Configure CORS for production
-CORS(app, origins=["https://nikhil-kadapala.github.io/object-detector-resnet101/"])
+if os.environ.get('FLASK_ENV') == 'development':
+    CORS(app)
+    app.config['TALISMAN_ENABLED'] = False
+else:
+    CORS(app, origins=["https://nikhil-kadapala.github.io/object-detector-resnet101/"], supports_credentials=False)
 
+    talisman = Talisman(
+        app,
+        force_https=True,  # Force HTTPS
+        strict_transport_security=True,
+        content_security_policy={
+            'default-src': '\'self\'',
+        }
+    )
+
+from werkzeug.middleware.proxy_fix import ProxyFix
+app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1)
+
+@app.before_request
+def enforce_https():
+    if os.environ.get('FLASK_ENV') == 'development':
+        return
+    
+    if request.headers.get('X-Forwarded-Proto') == 'http':
+        url = request.url.replace('http://', 'https://', 1)
+        return redirect(url, code=301)
+    
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
@@ -67,10 +99,21 @@ def predict_class(image_path):
         logger.error(f"Error predicting class: {e}")
         raise
 
-@app.route('/', methods=['GET', 'POST'])
+
+@app.route('/', methods=['GET'])
 
 def main():
     return send_from_directory(app.static_folder, "index.html")
+
+limiter = Limiter(
+    app=app,
+    key_func=get_remote_address,
+    default_limits=["100 per day", "50 per hour"]
+)
+
+@limiter.limit("5 per minute")
+
+@app.route('/detect', methods=['POST'])
 
 def upload_file():
     if request.method == 'POST':
@@ -114,6 +157,14 @@ def upload_file():
             return jsonify({'error': 'Server error processing image'}), 500
     else:
         return jsonify({'message': 'Ready to process images. Please send a POST request with an image.'})
+
+@app.after_request
+def set_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+    return response
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

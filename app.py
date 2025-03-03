@@ -167,6 +167,7 @@ def upload_file():
             
             # Clean up
             os.remove(file_path)
+            os.removedirs(UPLOAD_FOLDER)
             
             return jsonify({
                 'category': category, 

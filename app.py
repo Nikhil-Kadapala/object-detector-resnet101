@@ -32,7 +32,12 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 if os.environ.get('FLASK_ENV') == 'development':
     CORS(app)
 else:
-    CORS(app, resources={r"/*": {"origins": "https://nikhil-kadapala.github.io"}}, supports_credentials=False)
+    CORS(app, 
+        resources={r"/*": {"origins": ['https://nikhil-kadapala.github.io']}},
+        supports_credentials=True,
+        allow_headers=["Content-Type", "Authorization"],
+        methods=["GET", "POST", "OPTIONS"],
+        expose_headers=["Content-Type", "Authorization"])
 
     talisman = Talisman(
         app,
@@ -122,8 +127,10 @@ else:
 @app.route('/', methods=['OPTIONS'])
 def handle_options():
     response = make_response()
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
+    response.headers.add('Access-Control-Allow-Origin', 'https://nikhil-kadapala.github.io')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
     response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+    response.headers.add('Access-Control-Allow-Credentials', 'true')
     return response
 
 @app.after_request
@@ -132,11 +139,9 @@ def set_security_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers['Access-Control-Allow-Origin'] = 'https://nikhil-kadapala.github.io'
     return response
 
 @app.route('/', methods=['GET', 'POST'])
-@cross_origin(origins="https://nikhil-kadapala.github.io")
 @limiter.limit("5 per minute")
 def upload_file():
     if request.method == 'POST':
@@ -168,7 +173,6 @@ def upload_file():
             
             # Clean up
             os.remove(file_path)
-            os.removedirs(UPLOAD_FOLDER)
             
             return jsonify({
                 'category': category, 
@@ -181,6 +185,15 @@ def upload_file():
             return jsonify({'error': 'Server error processing image'}), 500
     else:
         return jsonify({'status': 'Hello 🙋‍♂️ I\'m awake now. Please upload an Image and click on Detect.'})
+
+@app.errorhandler(500)
+def handle_server_error(e):
+    response = jsonify({
+        "error": "Internal server error",
+        "message": str(e)
+    })
+    response.headers.add('Access-Control-Allow-Origin', 'https://nikhil-kadapala.github.io')
+    return response, 500
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 1998))

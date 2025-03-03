@@ -36,7 +36,7 @@ const ImageContainer = () => {
         if (isPlaying && images.length > 0) {
             interval = setInterval(() => {
                 setCurrentImageIndex((prevIndex) => (prevIndex + 1) % images.length);
-            }, 100);
+            }, 300);
         }
         return () => clearInterval(interval);
     }, [isPlaying, images]);

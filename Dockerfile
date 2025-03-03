@@ -51,4 +51,4 @@ USER appuser
 EXPOSE 5000
 
 # Command to run the application with gunicorn for better performance
-CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "app:app"]

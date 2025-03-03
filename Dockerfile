@@ -1,11 +1,13 @@
 # syntax=docker/dockerfile:1
 
-ARG PYTHON_VERSION=3.12.0
-FROM python:${PYTHON_VERSION}-slim as base
+ARG PYTHON_VERSION=3.12.9
+FROM python:${PYTHON_VERSION}-slim AS base
 
 # Prevents Python from writing pyc files and buffering stdout/stderr
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
 
 # Set working directory
 WORKDIR /app
@@ -45,8 +47,8 @@ RUN mkdir -p /app/tmp && chown -R appuser:appuser /app/tmp
 # Switch to non-privileged user
 USER appuser
 
-# Expose the port the app runs on
-EXPOSE 8000
+# Expose the port
+EXPOSE 5000
 
-# Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "1", "--threads", "2", "app:app"]
+# Command to run the application with gunicorn for better performance
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "app:app"]

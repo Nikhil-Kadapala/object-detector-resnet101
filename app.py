@@ -113,7 +113,7 @@ if os.environ.get('FLASK_ENV') == 'development':
         key_prefix="Too many requests",
     )
 else:
-    storage_uri = os.environ.get('REDIS_URL')
+    storage_uri = os.environ.get('REDIS_URL', "memory://")
     limiter = Limiter(
         app=app,
         key_func=get_remote_address,

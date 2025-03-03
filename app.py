@@ -24,16 +24,18 @@ if not os.path.exists(UPLOAD_FOLDER):
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
 
-app = Flask(__name__, static_folder="./dist", static_url_path="/")
+app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 
-# Configure CORS for production
-if os.environ.get('FLASK_ENV') == 'development':
-    CORS(app)
+ORIGINS = ['https://nikhil-kadapala.github.io', 'http://localhost:5173']
+
+# Configure CORS
+if os.environ.get('FLASK_ENV') == 'dev':
+    CORS(app, talisman=False)
 else:
     CORS(app, 
-        resources={r"/*": {"origins": ['https://nikhil-kadapala.github.io']}},
+        resources={r"/*": {"origins": ORIGINS}},
         supports_credentials=True,
         allow_headers=["Content-Type", "Authorization"],
         methods=["GET", "POST", "OPTIONS"],
@@ -101,10 +103,6 @@ def predict_class(image_path):
         raise
 
 
-#@app.route('/', methods=['GET'])
-
-#def main():
-    #return send_from_directory(app.static_folder, "index.html")
 
 if os.environ.get('FLASK_ENV') == 'development':
     # Use in-memory storage for development
@@ -126,20 +124,25 @@ else:
 
 @app.route('/', methods=['OPTIONS'])
 def handle_options():
-    response = make_response()
-    response.headers.add('Access-Control-Allow-Origin', 'https://nikhil-kadapala.github.io')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-    response.headers.add('Access-Control-Allow-Credentials', 'true')
-    return response
+    origin = request.headers.get('Origin')
+    if origin in ORIGINS:
+        response = make_response()
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+        response.headers.add('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        response.headers.add('Access-Control-Allow-Credentials', 'true')
+        return response
 
 @app.after_request
 def set_security_headers(response):
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'DENY'
-    response.headers['X-XSS-Protection'] = '1; mode=block'
-    response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    return response
+    origin = request.headers.get('Origin')
+    if origin in ORIGINS:
+        response.headers['Access-Control-Allow-Origin'] = origin
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['X-XSS-Protection'] = '1; mode=block'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        return response
 
 @app.route('/', methods=['GET', 'POST'])
 @limiter.limit("5 per minute")
@@ -192,10 +195,12 @@ def handle_server_error(e):
         "error": "Internal server error",
         "message": str(e)
     })
-    response.headers.add('Access-Control-Allow-Origin', 'https://nikhil-kadapala.github.io')
-    return response, 500
+    origin = request.headers.get('Origin')
+    if origin in ORIGINS:
+        response.headers.add('Access-Control-Allow-Origin', origin)
+        return response, 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 1998))
-    debug_mode = os.environ.get('FLASK_ENV') == 'development'
+    port = int(os.environ.get('PORT', 141998))
+    debug_mode = os.environ.get('FLASK_ENV') == 'dev'
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

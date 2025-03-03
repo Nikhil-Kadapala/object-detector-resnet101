@@ -32,7 +32,7 @@ ORIGINS = ['https://nikhil-kadapala.github.io', 'http://localhost:5173']
 
 # Configure CORS
 if os.environ.get('FLASK_ENV') == 'dev':
-    CORS(app, talisman=False)
+    CORS(app)
 else:
     CORS(app, 
         resources={r"/*": {"origins": ORIGINS}},
@@ -46,8 +46,11 @@ else:
         force_https=True,  # Force HTTPS
         strict_transport_security=True,
         content_security_policy={
-            'default-src': '\'self\'',
-        }
+            'default-src': "'self'",
+            'img-src': ["'self'", 'data:'],
+            'style-src': ["'self'", "'unsafe-inline'"],
+        },
+        content_security_policy_nonce_in=['script-src', 'style-src']
     )
 
 @app.before_request

@@ -110,11 +110,12 @@ if os.environ.get('FLASK_ENV') == 'development':
         key_prefix="Too many requests",
     )
 else:
+    storage_uri = os.environ.get('REDIS_URL')
     limiter = Limiter(
         app=app,
         key_func=get_remote_address,
         default_limits=["100 per day", "50 per hour"],
-        storage_uri="redis://red-cv29v6d6l47c73fmc1sg:6379",
+        storage_uri=storage_uri,
         strategy="fixed-window"
     )
 
@@ -182,6 +183,6 @@ def upload_file():
         return jsonify({'status': 'Hello 🙋‍♂️ I\'m awake now. Please upload an Image and click on Detect.'})
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
+    port = int(os.environ.get('PORT', 1998))
     debug_mode = os.environ.get('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

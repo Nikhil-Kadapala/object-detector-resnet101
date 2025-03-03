@@ -121,7 +121,7 @@ const ImageContainer = () => {
             const data = await wakeupResp.json();
             console.log('Backend server status:', data);
             setAwake(true);
-            setBackEndStatus(data['message']);
+            setBackEndStatus(data['status']);
         } catch (error) {
             console.error('Error contacting the server:', error);
             setBackEndStatus('We\'re sorry, the backend server is not responding 😓 Please try again.');

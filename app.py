@@ -31,9 +31,8 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 # Configure CORS for production
 if os.environ.get('FLASK_ENV') == 'development':
     CORS(app)
-    app.config['TALISMAN_ENABLED'] = False
 else:
-    CORS(app, resources={r"/*": {"origins": "https://nikhil-kadapala.github.io"}}, supports_credentials=True)
+    CORS(app, resources={r"/*": {"origins": "https://nikhil-kadapala.github.io"}}, supports_credentials=False)
 
     talisman = Talisman(
         app,
@@ -102,13 +101,22 @@ def predict_class(image_path):
 #def main():
     #return send_from_directory(app.static_folder, "index.html")
 
-limiter = Limiter(
-    app=app,
-    key_func=get_remote_address,
-    default_limits=["100 per day", "50 per hour"],
-    storage_uri="redis://red-cv29v6d6l47c73fmc1sg:6379",
-    strategy="fixed-window"
-)
+if os.environ.get('FLASK_ENV') == 'development':
+    # Use in-memory storage for development
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["100 per day", "50 per hour"],
+        key_prefix="Too many requests",
+    )
+else:
+    limiter = Limiter(
+        app=app,
+        key_func=get_remote_address,
+        default_limits=["100 per day", "50 per hour"],
+        storage_uri="redis://red-cv29v6d6l47c73fmc1sg:6379",
+        strategy="fixed-window"
+    )
 
 @app.route('/', methods=['OPTIONS'])
 def handle_options():
@@ -123,9 +131,8 @@ def set_security_headers(response):
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-    response.headers["Access-Control-Allow-Origin"] = "https://nikhil-kadapala.github.io"
+    response.headers['Access-Control-Allow-Origin'] = 'https://nikhil-kadapala.github.io'
     return response
-
 
 @app.route('/', methods=['GET', 'POST'])
 @cross_origin(origins="https://nikhil-kadapala.github.io")
@@ -171,7 +178,7 @@ def upload_file():
             logger.error(f"Error processing request: {e}")
             return jsonify({'error': 'Server error processing image'}), 500
     else:
-        return jsonify({'message': 'Ready to process images. Please send a POST request with an image.'})
+        return jsonify({'status': 'Hello 🙋‍♂️ I\'m awake now. Please upload an Image and click on Detect.'})
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))

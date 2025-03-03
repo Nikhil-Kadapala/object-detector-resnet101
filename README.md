@@ -1,34 +1,56 @@
-# React + Vite
+# Object Detection using RestNet-101 Model
+This project simulates the facial recognition software that searches through a database like shown in the movies.
 
-<<<<<<< HEAD
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+It has a React front-end and a flask app in the back-end serving the requests.
 
-Currently, two official plugins are available:
+The front end is deployed here on Github pages and the back-end on render.com
 
-<<<<<<< HEAD
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-=======
-- 🔭 I’m currently working on ...
-- 🌱 I’m currently learning ...
-- 👯 I’m looking to collaborate on ...
-- 🤔 I’m looking for help with ...
-- 💬 Ask me about ...
-- 📫 How to reach me: ...
-- 😄 Pronouns: ...
-- ⚡ Fun fact: ...
--->
+The back-end is configured with CORS to serve only the requests from this react front-end origin.
 
-<!Doctype HTML>
-<html/>
-<head/>
-Hi, I'm Nikhil. A CS Grad student at the University of New Hampshire.
-Full portfolio coming soon.
-</head>
-</html>
->>>>>>> 3f4bb9d1bf5e63b21c1df2962cb3e12324ccc721
-=======
-The backend is a simple Python flask app that receives an image input from the front-end application.
+To implement this server-client simulation locally, follow the below instructions.
 
-The front-end UI is a simple React+Vite Framework front-end application.
->>>>>>> 8f725309f5577e3c466fb2581ee6919782ccd4c2
+## 1. Clone the repository
+```
+git clone https://github.com/Nikhil-Kadapala/object-detector-resnet101.git
+
+cd object-detector-resnet101
+```
+
+## 2. Install the dependencies
+
+``` 
+pip install -r requirements.txt
+```
+
+## 3. Start the server or Flask app using any of the below commands
+```
+python3 app.py
+```
+```
+flask run
+```
+if your flask app is not named 'app.py', then run the below command
+```
+flask --app your_flask_app.py run
+```
+
+## 4. Start the React App
+```
+npm start
+```
+
+Inorder for this to work on the same machine you need to used different ports for the server and the client. Make sure you update the client and server URLs in the flask and react apps respectively.
+
+The easiest way to test this setup is to run both ends in dev mode.
+
+### On the server side, set the below environment variables before starting the server.
+```
+.\.venv\Scripts\activate
+```
+```
+$env:FLASK_ENV="development"
+```
+### Run the below command to start the react app in dev mode
+```
+npm run dev
+```

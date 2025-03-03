@@ -16,3 +16,12 @@
 .logo:hover {
   filter: drop-shadow(0 0 2em #ffffff);
 }
+
+.logo2 {
+  will-change: filter;
+  transition: filter 3000ms;
+}
+
+.logo2:hover {
+  filter: drop-shadow(0 0 2em #fbff00);
+}

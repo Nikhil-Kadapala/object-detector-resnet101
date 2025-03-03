@@ -13,6 +13,8 @@ const ImageContainer = () => {
     const [isPlaying, setIsPlaying] = useState(false);
     const [isSearching, setIsSearching] = useState(false);
     const [imageSrc, setImageSrc] = useState(null);
+    const [awake, setAwake] = useState(false);
+    const [backEndStatus, setBackEndStatus] = useState(null);
 
     useEffect(() => {
         const loadImages = async () => {
@@ -54,8 +56,6 @@ const ImageContainer = () => {
             {
                 method: 'POST',
                 body: formData,
-                mode: 'cors',
-                credentials: 'include'
             });
             const data = await response.json();
             console.log('Server response:', data);
@@ -67,7 +67,7 @@ const ImageContainer = () => {
             setServerResponse(data);
         } catch (error) {
             console.error('Error contacting the server:', error);
-            setServerResponse({ category: "Backend server is inactive 😓 Please try again later 🙏"});
+            setServerResponse({ category: "Backend server refused connection 😓 Please click reset and try again 🙏"});
         } finally {
             setIsSearching(false);
         }
@@ -93,6 +93,7 @@ const ImageContainer = () => {
         setIsVisible(true);
         setServerResponse(null);
         setImageSrc(null);
+        setAwake(false);
         // Clear the file input
         const fileInput = document.querySelector('input[type="file"]');
         if (fileInput) {
@@ -114,28 +115,69 @@ const ImageContainer = () => {
         return <div>Loading the Database...</div>;
     }
 
+    const wakeupBackend = async () => {
+        try {
+            const wakeupResp = await fetch('https://object-detector-resnet101.onrender.com/');
+            const data = await wakeupResp.json();
+            console.log('Backend server status:', data);
+            setAwake(true);
+            setBackEndStatus(data['message']);
+        } catch (error) {
+            console.error('Error contacting the server:', error);
+            setBackEndStatus('We\'re sorry, the backend server is not responding 😓 Please try again.');
+        }
+    }
+
     return (
         <div className="mx-80 flex flex-col rounded-xl px-52 py-10 lg:px-96">
             {isVisible && (
                 <div className="text-2xl font-semibold text-center">
-                    <div className="">
-                        <h1>Upload an Image and click on Detect</h1>
-                        <div className="upload-container mt-10 mb-10 px-40 items-center">
-                            <input type="file" accept="image/*" />
-                        </div>
-                        <div className="mx-60 mb-14 rounded-xl bg-gray-300 text-gray-700 hover:bg-gray-900 hover:text-gray-300">
-                            {!isPlaying && (
-                                <button 
-                                    onClick={uploadImage}
+                    <div className="justify-items-center">
+                        {!awake ? (
+                            <>  <div className='font-semibold text-2xl mx-20 mb-16'>
+                                    <h1>
+                                        The backend server is sleeping 😴 Click below 👇 to wake it up
+                                    </h1>
+                                </div>
+                                <div className="px-4 py-3 mb-14 rounded-xl bg-gray-300 text-gray-950 font-semibold hover:bg-gray-800 hover:text-gray-300">
+                                    <button
+                                        onClick={wakeupBackend}
+                                    >
+                                        Wake up
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <div className='mx-auto mb-14 mt-10 justify-items-center'>
+                                <motion.h3
+                                    className="mt-10 text-2xl font-semibold logo"
+                                    initial={{ opacity: 0, y: -20 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 1 }}
+                                    viewport={{ once: true}}
                                 >
-                                    Detect
-                                </button>
-                            )}
-                        </div>
+                                    {backEndStatus}
+                                </motion.h3>
+                                <div className="upload-container mt-14 mb-14 px-40 justify-items-center">
+                                    <input type="file" accept="image/*" />
+                                </div>
+                                <div className="px-8 py-3 mb-20 rounded-xl bg-gray-300 text-gray-700 hover:bg-gray-900 hover:text-gray-300">
+                                    {!isPlaying && (
+                                        <button 
+                                            onClick={uploadImage}
+                                        >
+                                            Detect
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                        
+                        
                     </div>
                     {isSearching ? (
                         
-                        <div className="mx-auto mb-10">
+                        <div className="mx-auto px-6 py-6 mb-14 justify-items-center rounded-3xl shadow-2xl max-w-screen-lg bg-gradient-to-b from-gray-700 to-gray-900">
                             {isPlaying && (
                                 <img 
                                     src={images[currentImageIndex]} 
@@ -146,28 +188,28 @@ const ImageContainer = () => {
                         </div>
                     ) : (
                         serverResponse && (
-                            <div>
+                            <div className='justify-items-center'>
                                 {imageSrc && (
-                                    <div className="mx-auto mb-14">
+                                    <div className="mx-auto px-6 py-6 mb-14 justify-items-center rounded-3xl shadow-2xl max-w-screen-lg bg-gradient-to-b from-gray-700 to-gray-900">
                                         <img 
                                             src={imageSrc} 
                                             alt="Selected" 
                                         />
                                     </div>
                                 )}
-                                <div className="mx-auto mb-14 justify-center">
+                                <div className="mx-auto mb-14 justify-items-center">
                                     <h3>Your Uploaded Image contains:</h3>
                                     <motion.h4
-                                        className="mt-10 text-2xl font-semibold logo"
+                                        className="mt-10 text-4xl font-bold logo2"
                                         initial={{ opacity: 0, y: -20 }}
                                         whileInView={{ opacity: 1, y: 0 }}
-                                        transition={{ duration: 1 }}
+                                        transition={{ duration: 1.5 }}
                                         viewport={{ once: true}}
                                     >
                                         {serverResponse["category"]}
                                     </motion.h4>
                                 </div>
-                                <div className="mx-60 mb-5 rounded-xl bg-gray-300 text-gray-950  hover:bg-gray-950 hover:text-gray-300">
+                                <div className="mb-5 px-8 py-3 justify-items-center rounded-xl bg-gray-300 text-gray-950  hover:bg-gray-950 hover:text-gray-300">
                                     <button 
                                         onClick={resetView}
                                     >

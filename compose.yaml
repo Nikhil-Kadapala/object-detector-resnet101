@@ -12,7 +12,7 @@ services:
     build:
       context: .
     environment:
-      - FLASK_ENV=prod
+      - FLASK_ENV=production
       - WORKERS=1
       - THREADS=2
 

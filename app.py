@@ -22,7 +22,7 @@ if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
     
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB
+MAX_CONTENT_LENGTH = 16 * 1024 * 1024 
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -31,8 +31,8 @@ app.config['MAX_CONTENT_LENGTH'] = MAX_CONTENT_LENGTH
 ORIGINS = ['https://nikhil-kadapala.github.io', 'http://localhost:5173']
 
 # Configure CORS
-if os.environ.get('FLASK_ENV') == 'dev':
-    CORS(app)
+if os.environ.get('FLASK_ENV') == 'development':
+    CORS(app, talisman=False)
 else:
     CORS(app, 
         resources={r"/*": {"origins": ORIGINS}},
@@ -43,7 +43,7 @@ else:
 
     talisman = Talisman(
         app,
-        force_https=True,  # Force HTTPS
+        force_https=True,
         strict_transport_security=True,
         content_security_policy={
             'default-src': "'self'",
@@ -188,9 +188,9 @@ def upload_file():
             
         except Exception as e:
             logger.error(f"Error processing request: {e}")
-            return jsonify({'error': 'Server error processing image'}), 500
+            return jsonify({'category': 'Server error processing image'}), 500
     else:
-        return jsonify({'status': 'Hello 🙋‍♂️ I\'m awake now. Please upload an Image and click on Detect.'})
+        return jsonify({'message': 'Hello 🙋‍♂️ I\'m awake now. Please upload an Image and click on Detect.'})
 
 @app.errorhandler(500)
 def handle_server_error(e):
@@ -204,6 +204,6 @@ def handle_server_error(e):
         return response, 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 141998))
-    debug_mode = os.environ.get('FLASK_ENV') == 'dev'
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_ENV') == 'development'
     app.run(host='0.0.0.0', port=port, debug=debug_mode)

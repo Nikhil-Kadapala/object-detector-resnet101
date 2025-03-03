@@ -52,7 +52,7 @@ const ImageContainer = () => {
         try {
             const formData = new FormData();
             formData.append('image', file);
-            const response = await fetch('https://object-detector-resnet101.onrender.com/', 
+            const response = await fetch('https://object-detector-resnet-101-5b770a59bfda.herokuapp.com/', 
             {
                 method: 'POST',
                 body: formData,
@@ -117,14 +117,13 @@ const ImageContainer = () => {
 
     const wakeupBackend = async () => {
         try {
-            const wakeupResp = await fetch('https://object-detector-resnet101.onrender.com/');
+            const wakeupResp = await fetch('https://object-detector-resnet-101-5b770a59bfda.herokuapp.com/');
             const data = await wakeupResp.json();
             console.log('Backend server status:', data);
             setAwake(true);
-            setBackEndStatus(data['status']);
+            setBackEndStatus(data['message']);
         } catch (error) {
-            console.error('Error contacting the server:', error);
-            setBackEndStatus('We\'re sorry, the backend server is not responding 😓 Please try again.');
+            console.error('Error contacting the server:', error['message']);
         }
     }
 

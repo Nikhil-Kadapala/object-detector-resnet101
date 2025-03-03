@@ -47,8 +47,5 @@ RUN mkdir -p /app/tmp && chown -R appuser:appuser /app/tmp
 # Switch to non-privileged user
 USER appuser
 
-# Expose the port
-EXPOSE 5000
-
 # Command to run the application with gunicorn for better performance
 CMD ["gunicorn", "app:app"]
